@@ -2,6 +2,7 @@ import websocket
 import ssl
 import json
 import requests
+import threading
 
 
 class Binance:
@@ -75,7 +76,11 @@ class Binance:
                                     on_close=on_close,
                                     on_open=on_open)
 
-        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+        thread = threading.Thread(target=ws.run_forever, kwargs=dict(sslopt={"cert_reqs": ssl.CERT_NONE}))
+        thread.start()
+        #ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+        print("foreground")
+
 
     def update_order_book(self, data):
         #bids
