@@ -114,5 +114,4 @@ class Binance:
         print(self.order_book['asks'][0][0])
         print(self.order_book['bids'][0][0])
 
-#test github on pycharm
 b = Binance()

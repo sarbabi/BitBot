@@ -1,0 +1,14 @@
+appdirs==1.4.4
+certifi==2020.12.5
+chardet==4.0.0
+distlib==0.3.1
+filelock==3.0.12
+idna==2.10
+pipenv==2020.11.15
+requests==2.25.1
+six==1.15.0
+urllib3==1.26.3
+virtualenv==20.4.0
+virtualenv-clone==0.5.4
+websocket-client==0.57.0
+wheel==0.24.0
