@@ -4,6 +4,7 @@ import json
 import requests
 import threading
 from datetime import datetime
+import simulator
 
 
 class Binance:
@@ -95,6 +96,8 @@ class Binance:
             # make sell price
             ask = self.order_book['asks'][0][0]
             print(ask, "ask")
+
+            simulator.set_up(bid=bid, ask=ask, maker_commission=self.maker_commission)
             self.set_orders(bid=bid, ask=ask)
 
         def on_close(ws):
@@ -149,6 +152,7 @@ class Binance:
         ask = self.order_book['asks'][0][0]
         print("ask:", ask, "bid:", bid)
         self.check_orders(bid, ask)
+        simulator.check_orders(bid=bid, ask=ask, maker_commission=self.maker_commission)
 
     def check_orders(self, bid, ask):
         if bid < self.buy_price:
