@@ -12,7 +12,7 @@ def set_up(bid, ask, maker_commission):
             and_(Orders.strategy_id == strategy.id, Orders.status == 'placed'))
         if strategy_orders.count() > 0:
             continue
-        send_orders(bid=bid, ask=ask, maker_commission=maker_commission, strategy=strategy)
+        send_orders(bid=bid, ask=ask, maker_commission=maker_commission, strategy=strategy, volume=0.015)
 
 
 def send_orders(bid, ask, maker_commission, strategy, volume=1):
@@ -57,7 +57,7 @@ def check_orders(bid, ask, maker_commission):
                     sell_order.status = 'removed'
                     sell_order.update_time = datetime.now()
                 strategy = session.query(Strategy).filter(Strategy.id == order.strategy_id).first()
-                send_orders(order.net_price, order.net_price, maker_commission, strategy)
+                send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
                 update_portfolio(order=order, strategy=strategy, bid=bid)
                 session.commit()
         elif order.side == 'sell':
@@ -72,7 +72,7 @@ def check_orders(bid, ask, maker_commission):
                     buy_order.status = 'removed'
                     buy_order.update_time = datetime.now()
                 strategy = session.query(Strategy).filter(Strategy.id == order.strategy_id).first()
-                send_orders(order.net_price, order.net_price, maker_commission, strategy)
+                send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
                 update_portfolio(order=order, strategy=strategy, bid=bid)
                 session.commit()
 
