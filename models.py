@@ -22,7 +22,7 @@ class Orders(Base):
     price = Column(FLOAT)
     status = Column(VARCHAR(10), name='orderStatus')
     net_price = Column(FLOAT, name='netPrice')
-    volume = Column(FLOAT)
+    volume = Column(FLOAT, default=1)
     insert_time = Column(DATETIME, name='insertTime')
     update_time = Column(DATETIME, name='updateTime')
     strategy_id = Column(Integer, name='strategyID')

@@ -4,3 +4,4 @@ log.csv
 __pycache__
 __pycache__/*
 .DS_Store
+localsettings.py
