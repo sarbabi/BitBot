@@ -1,5 +1,5 @@
-from db import Session
-from models import Portfolio, Orders, Strategy
+from dbtools.db import Session
+from dbtools.models import Portfolio, Orders, Strategy
 from sqlalchemy import and_
 from datetime import datetime
 
@@ -13,6 +13,7 @@ def set_up(bid, ask, maker_commission):
         if strategy_orders.count() > 0:
             continue
         send_orders(bid=bid, ask=ask, maker_commission=maker_commission, strategy=strategy, volume=0.015)
+    session.close()
 
 
 def send_orders(bid, ask, maker_commission, strategy, volume=1):
@@ -39,6 +40,7 @@ def send_orders(bid, ask, maker_commission, strategy, volume=1):
                         strategy_id=strategy.id)
     session.add(sell_order)
     session.commit()
+    session.close()
 
 
 def check_orders(bid, ask, maker_commission):
@@ -56,10 +58,6 @@ def check_orders(bid, ask, maker_commission):
                     sell_order = sell_orders.first()
                     sell_order.status = 'removed'
                     sell_order.update_time = datetime.now()
-                strategy = session.query(Strategy).filter(Strategy.id == order.strategy_id).first()
-                send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
-                update_portfolio(order=order, strategy=strategy, bid=bid)
-                session.commit()
         elif order.side == 'sell':
             if ask > order.price:
                 order.status = 'done'
@@ -71,10 +69,11 @@ def check_orders(bid, ask, maker_commission):
                     buy_order = buy_orders.first()
                     buy_order.status = 'removed'
                     buy_order.update_time = datetime.now()
-                strategy = session.query(Strategy).filter(Strategy.id == order.strategy_id).first()
-                send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
-                update_portfolio(order=order, strategy=strategy, bid=bid)
-                session.commit()
+        strategy = session.query(Strategy).get(order.strategy_id)
+        send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
+        update_portfolio(order=order, strategy=strategy, bid=bid)
+        session.commit()
+    session.close()
 
 def get_account(strategy):
     session = Session()
@@ -107,3 +106,4 @@ def update_portfolio(order, strategy, bid):
                               insert_time=datetime.now())
     session.add(new_portfolio)
     session.commit()
+    session.close()

@@ -48,6 +48,7 @@ class Binance:
                     pass
                 else:
                     self.order_book = self.get_snapshot()
+
                     print("else")
 
         def on_open(ws):
