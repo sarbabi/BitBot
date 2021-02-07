@@ -39,16 +39,13 @@ class Binance:
                     self.update_order_book(data)
                     # update order book
                     self.u = data['u']
-                    pass
                 elif data['U'] == self.u + 1:
                     print("new event")
-                    self.update_order_book(data)
                     # update order book
+                    self.update_order_book(data)
                     self.u = data['u']
-                    pass
                 else:
                     self.order_book = self.get_snapshot()
-
                     print("else")
 
         def on_open(ws):

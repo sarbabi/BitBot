@@ -69,9 +69,10 @@ def check_orders(bid, ask, maker_commission):
                     buy_order = buy_orders.first()
                     buy_order.status = 'removed'
                     buy_order.update_time = datetime.now()
-        strategy = session.query(Strategy).get(order.strategy_id)
-        send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
-        update_portfolio(order=order, strategy=strategy, bid=bid)
+        if order.net_price:
+            strategy = session.query(Strategy).get(order.strategy_id)
+            send_orders(order.net_price, order.net_price, maker_commission, strategy, volume=0.015)
+            update_portfolio(order=order, strategy=strategy, bid=bid)
         session.commit()
     session.close()
 
