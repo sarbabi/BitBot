@@ -40,3 +40,29 @@ class Portfolio(Base):
     strategy_id = Column(Integer, name='strategyID')
     order_id = Column(Integer, name='orderID')
     insert_time = Column(DATETIME, name='insertTime')
+
+
+class RealOrder(Base):
+    __tablename__ = 'realOrder'
+    id = Column(Integer, primary_key=True)
+    binance_id = Column(VARCHAR(20), name='binanceId')
+    symbol = Column(VARCHAR(10))
+    price = Column(FLOAT)
+    volume = Column(FLOAT)
+    traded_volume = Column(FLOAT, name='tradedVolume')
+    status = Column(VARCHAR(10), name='orderStatus')
+    insert_time = Column(DATETIME, name='insertTime')
+    update_time = Column(DATETIME, name='updateTime')
+
+
+class Trade(Base):
+    __tablename__ = 'trade'
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, name='orderId')
+    binance_id = Column(VARCHAR(20), name='binanceId')
+    symbol = Column(VARCHAR(10))
+    price = Column(FLOAT)
+    volume = Column(FLOAT)
+    traded_volume = Column(FLOAT, name='tradedVolume')
+    status = Column(VARCHAR(10), name='orderStatus')
+    insert_time = Column(DATETIME, name='insertTime')
