@@ -182,12 +182,12 @@ class OrderManager:
             'side': 'BUY',
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
-            'price': order.price * (1-0.001),
+            'price': order.price * (1-0.01),
             'quantity': 0.001,
             'symbol': "BTCUSDT",
         })
         #plunging price
-        if OrderManager.last_trade_price != order.price * (1-0.001):
+        if OrderManager.last_trade_price != order.price * (1-0.01):
             print("sell order sent at: {}".format(datetime.now()))
             OrderManager.send_order({
                 'side': 'SELL',
