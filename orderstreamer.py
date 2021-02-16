@@ -194,7 +194,7 @@ class OrderManager:
                 'type': 'LIMIT',
                 'timeInForce': 'GTC',  # Good Till Cancel
                 'price': order.price * (1+localsettings.strategy_percent),
-                'quantity': 0.02*(1-0.001),
+                'quantity': 0.02,
                 'symbol': "BTCUSDT",
             })
         else:
