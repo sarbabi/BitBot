@@ -18,7 +18,7 @@ def set_up(bid, ask, maker_commission):
     session.close()
 
 
-def send_orders(bid, ask, maker_commission, strategy, volume=0.02):
+def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
     account = get_account(strategy=strategy)
     btc = account["btc"]
     cash = account["cash"]
@@ -132,7 +132,7 @@ def update_portfolio(order, strategy, bid):
     session.commit()
     session.close()
 
-def send_order(strategy, side, price, maker_commission=0.001, volume=0.02):
+def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
     account = get_account(strategy)
     cash = account['cash']
     btc = account['btc']
