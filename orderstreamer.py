@@ -183,7 +183,7 @@ class OrderManager:
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': order.price * (1-localsettings.strategy_percent),
-            'quantity': 0.01,
+            'quantity': 0.02,
             'symbol': "BTCUSDT",
         })
         #plunging price
@@ -194,7 +194,7 @@ class OrderManager:
                 'type': 'LIMIT',
                 'timeInForce': 'GTC',  # Good Till Cancel
                 'price': order.price * (1+localsettings.strategy_percent),
-                'quantity': 0.01,
+                'quantity': 0.02,
                 'symbol': "BTCUSDT",
             })
         else:
