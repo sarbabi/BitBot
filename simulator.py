@@ -18,7 +18,7 @@ def set_up(bid, ask, maker_commission):
     session.close()
 
 
-def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
+def send_orders(bid, ask, maker_commission, strategy, volume=0.02):
     account = get_account(strategy=strategy)
     btc = account["btc"]
     cash = account["cash"]
@@ -30,7 +30,7 @@ def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
     else:
         status = 'error'
     if localsettings.TEST_MODE:
-        buy_order = Orders(side='buy', price=buy_price, status=status, volume=volume, insert_time=datetime.now(),
+        buy_order = Orders(side='buy', price=buy_price, status=status, volume=volume*(1+maker_commission), insert_time=datetime.now(),
                        strategy_id=strategy.id)
         session.add(buy_order)
     elif status=='placed':
@@ -39,7 +39,7 @@ def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': buy_price,
-            'quantity': volume,
+            'quantity': volume*(1+maker_commission),
             'symbol': "BTCUSDT",
         })
     if volume <= btc:
@@ -48,7 +48,7 @@ def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
         status = 'error'
     sell_price = (1 + strategy.percent) * ask * (1 + maker_commission)
     if localsettings.TEST_MODE:
-        sell_order = Orders(side='sell', price=sell_price, status=status, volume=volume, insert_time=datetime.now(),
+        sell_order = Orders(side='sell', price=sell_price, status=status, volume=volume*(1-maker_commission), insert_time=datetime.now(),
                             strategy_id=strategy.id)
         session.add(sell_order)
     elif status == 'placed':
@@ -57,7 +57,7 @@ def send_orders(bid, ask, maker_commission, strategy, volume=0.02002):
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': sell_price,
-            'quantity': volume,
+            'quantity': volume*(1-maker_commission),
             'symbol': "BTCUSDT",
         })
     session.commit()
@@ -132,7 +132,7 @@ def update_portfolio(order, strategy, bid):
     session.commit()
     session.close()
 
-def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
+def send_order(strategy, side, price, maker_commission=0.001, volume=0.02):
     account = get_account(strategy)
     cash = account['cash']
     btc = account['btc']
@@ -144,7 +144,7 @@ def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
         else:
             status = 'error'
         if localsettings.TEST_MODE:
-            buy_order = Orders(side='buy', price=price,net_price=round(price*(1+maker_commission),2), status=status, volume=volume, insert_time=get_now(),
+            buy_order = Orders(side='buy', price=price,net_price=round(price*(1+maker_commission),2), status=status, volume=volume*(1+maker_commission), insert_time=get_now(),
                                strategy_id=strategy.id)
             session.add(buy_order)
             update_portfolio(buy_order, strategy, price)
@@ -154,7 +154,7 @@ def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
                 'type': 'LIMIT',
                 'timeInForce': 'GTC',  # Good Till Cancel
                 'price': price,
-                'quantity': volume,
+                'quantity': volume*(1+maker_commission),
                 'symbol': "BTCUSDT",
             })
     else:
@@ -163,7 +163,7 @@ def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
         else:
             status = 'error'
         if localsettings.TEST_MODE:
-            sell_order = Orders(side='sell', price=price,net_price=round(price*(1-maker_commission),2), status=status, volume=volume, insert_time=get_now(),
+            sell_order = Orders(side='sell', price=price,net_price=round(price*(1-maker_commission),2), status=status, volume=volume*(1-maker_commission), insert_time=get_now(),
                                 strategy_id=strategy.id)
             session.add(sell_order)
             update_portfolio(sell_order, strategy, price)
@@ -173,7 +173,7 @@ def send_order(strategy, side, price, maker_commission=0.001, volume=0.02002):
                 'type': 'LIMIT',
                 'timeInForce': 'GTC',  # Good Till Cancel
                 'price': price,
-                'quantity': volume,
+                'quantity': volume*(1-maker_commission),
                 'symbol': "BTCUSDT",
             })
     session.commit()
