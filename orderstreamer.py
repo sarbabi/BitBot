@@ -113,6 +113,7 @@ class OrderManager:
 
     @staticmethod
     def update_order(msg):
+        print(msg)
         OrderManager.insert_trade(msg)
         info = {
             'binance_id': str(msg['i']),
