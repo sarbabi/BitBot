@@ -183,7 +183,7 @@ class Binance:
         sa = sum([(ask[0] - last_price) * ask[1] for ask in asks])
         bid = bids[0][0]
         ask = asks[0][0]
-        #print(round(sb + sa, 2), bid, ask)
+        print(round(sb + sa, 2), bid, ask)
         #print("volume b/s:", ratio, bid, ask)
         #print(round(sell_avg_price - ask, 2), round(bid - buy_avg_price, 2))
 
