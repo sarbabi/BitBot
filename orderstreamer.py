@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from dbtools.models import RealOrder, Trade
 from dbtools.db import Session
 from sqlalchemy import or_, and_
+import telegram_send
+import threading
 
 """
 payload = {
@@ -112,9 +114,18 @@ class OrderManager:
         return datetime.utcnow() + timedelta(hours=1, minutes=0)
 
     @staticmethod
+    def send_telegram_message(msg):
+        price = float(msg['p'])
+        traded_volume = float(msg['z'])
+        telegram_send.send(messages=[f"inser time: {OrderManager.get_now()}, price: {price}, traded_volume: {traded_volume}"])
+
+    @staticmethod
     def update_order(msg):
         print(msg)
         print(OrderManager.get_now())
+
+        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+        telegram_thread.start()
 
         OrderManager.insert_trade(msg)
         info = {
