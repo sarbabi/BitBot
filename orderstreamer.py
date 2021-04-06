@@ -117,7 +117,7 @@ class OrderManager:
     def send_telegram_message(msg):
         price = float(msg['p'])
         traded_volume = float(msg['z'])
-        telegram_send.send(messages=[f"inser time: {OrderManager.get_now()}, price: {price}, traded_volume: {traded_volume}"])
+        telegram_send.send(messages=[f"insert time: {OrderManager.get_now()}, price: {price}, traded_volume: {traded_volume}"])
 
     @staticmethod
     def update_order(msg):
@@ -197,7 +197,7 @@ class OrderManager:
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': order.price * (1-localsettings.strategy_percent),
-            'quantity': 0.0025*(1+0.001),
+            'quantity': 0.01*(1+0.001),
             'symbol': "BTCUSDT",
         })
         #plunging price
@@ -208,7 +208,7 @@ class OrderManager:
                 'type': 'LIMIT',
                 'timeInForce': 'GTC',  # Good Till Cancel
                 'price': order.price * (1+localsettings.strategy_percent),
-                'quantity': 0.0025,
+                'quantity': 0.01,
                 'symbol': "BTCUSDT",
             })
         else:
