@@ -121,12 +121,24 @@ class OrderManager:
         price = float(msg['p'])
         traded_volume = float(msg['z'])
         side = msg['S']
-        telegram_send.send(messages=[f"{side}, {traded_volume}BTC in {price}$"])
+
+        message_text = msg['x']
+        if msg['x'] == "TRADE":
+            message_text = f"{side}, {traded_volume}BTC in {price}$"
+        elif msg['x'] == "NEW":
+            message_text = f"NEW, {traded_volume}BTC in {price}$"
+        elif msg['x'] == "CANCELED":
+            message_text = f"CANCELED, {traded_volume}BTC in {price}$"
+
+        telegram_send.send(messages=[message_text])
 
     @staticmethod
     def update_order(msg):
         print(msg)
         print(OrderManager.get_now())
+
+        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+        telegram_thread.start()
 
         OrderManager.insert_trade(msg)
         info = {
