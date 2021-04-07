@@ -43,6 +43,9 @@ print(response.json())
 
 class OrderManager:
     last_trade_price = 0
+    repeated_buy_count = 0
+    repeated_sell_count = 0
+
 
     @staticmethod
     def sign(params):
@@ -117,15 +120,13 @@ class OrderManager:
     def send_telegram_message(msg):
         price = float(msg['p'])
         traded_volume = float(msg['z'])
-        telegram_send.send(messages=[f"insert time: {OrderManager.get_now()}, price: {price}, traded_volume: {traded_volume}"])
+        side = msg['S']
+        telegram_send.send(messages=[f"{side}, {traded_volume}BTC in {price}$"])
 
     @staticmethod
     def update_order(msg):
         print(msg)
         print(OrderManager.get_now())
-
-        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-        telegram_thread.start()
 
         OrderManager.insert_trade(msg)
         info = {
@@ -149,6 +150,19 @@ class OrderManager:
                 order.status = 'DONE'
                 OrderManager.last_trade_price = order.price
                 to_balance = True
+
+                telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+                telegram_thread.start()
+
+                ######### stopping the code from overbuying or overselling when price is shooting high or plunging down ###
+                side = msg['S']
+                if side=='BUY':
+                    OrderManager.repeated_buy_count += 1
+                    OrderManager.repeated_sell_count = 0
+                elif side=='SELL':
+                    OrderManager.repeated_sell_count += 1
+                    OrderManager.repeated_buy_count = 0
+
                 print("order {} at {} is done".format(info['binance_id'], order.price))
 
             order.update_time = OrderManager.get_now()
@@ -192,24 +206,32 @@ class OrderManager:
             OrderManager.cancel_order(symbol=order.symbol, order_id=int(other_side_order.binance_id))
         session.commit()
         session.close()
+
+        buy_step = 1
+        if OrderManager.repeated_buy_count >= 3:
+            buy_step = 2
+        sell_step = 1
+        if OrderManager.repeated_sell_count >= 3:
+            sell_step = 2
+
         OrderManager.send_order({
             'side': 'BUY',
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
-            'price': order.price * (1-localsettings.strategy_percent),
+            'price': order.price * (1-buy_step*localsettings.strategy_percent),
             'quantity': 0.01*(1+0.001),
             'symbol': "BTCUSDT",
         })
         #plunging price
-        if OrderManager.last_trade_price != order.price * (1-localsettings.strategy_percent):
-            print("sell order sent at: {}".format(datetime.now()))
-            OrderManager.send_order({
-                'side': 'SELL',
-                'type': 'LIMIT',
-                'timeInForce': 'GTC',  # Good Till Cancel
-                'price': order.price * (1+localsettings.strategy_percent),
-                'quantity': 0.01,
-                'symbol': "BTCUSDT",
-            })
-        else:
-            print("order skipped at: {}".format(datetime.now()))
+        #if OrderManager.last_trade_price != order.price * (1-localsettings.strategy_percent):
+            #print("sell order sent at: {}".format(datetime.now()))
+        OrderManager.send_order({
+            'side': 'SELL',
+            'type': 'LIMIT',
+            'timeInForce': 'GTC',  # Good Till Cancel
+            'price': order.price * (1+sell_step*localsettings.strategy_percent),
+            'quantity': 0.01,
+            'symbol': "BTCUSDT",
+        })
+        #else:
+            #print("order skipped at: {}".format(datetime.now()))
