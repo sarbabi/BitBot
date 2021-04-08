@@ -181,4 +181,4 @@ def send_order(strategy, side, price, maker_commission=0.001, volume=localsettin
 
 
 def get_now():
-    return datetime.utcnow() + timedelta(hours=1, minutes=0)
+    return datetime.utcnow() + timedelta(hours=2, minutes=0)

@@ -117,7 +117,7 @@ class OrderManager:
 
     @staticmethod
     def get_now():
-        return datetime.utcnow() + timedelta(hours=1, minutes=0)
+        return datetime.utcnow() + timedelta(hours=2, minutes=0)
 
     @staticmethod
     def send_telegram_message(msg):
@@ -125,15 +125,9 @@ class OrderManager:
         traded_volume = float(msg['z'])
         side = msg['S']
 
-        message_text = msg['x']
-        if msg['x'] == "NEW":
-            message_text = f"NEW, {traded_volume}BTC in {price}$"
-        elif msg['x'] == "CANCELED":
-            message_text = f"CANCELED, {traded_volume}BTC in {price}$"
-        else:
-            message_text = f"{side} Done, {traded_volume}BTC in {price}$"
-            if msg['z'] >= localsettings.strategy_volume:
-                message_text += f" wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
+        message_text = f"{msg['x']}, {side}, {traded_volume}BTC in {price}$"
+        if msg['z'] >= localsettings.strategy_volume:
+            message_text += f"\n wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
 
         telegram_send.send(messages=[message_text])
 
@@ -141,9 +135,6 @@ class OrderManager:
     def update_order(msg):
         print(msg)
         print(OrderManager.get_now())
-
-        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-        telegram_thread.start()
 
         OrderManager.insert_trade(msg)
         info = {
@@ -174,7 +165,7 @@ class OrderManager:
                     OrderManager.cash -= float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_buy_count += 1
                     OrderManager.repeated_sell_count = 0
-                elif side=='SELL':
+                elif side == 'SELL':
                     OrderManager.btc -= float(msg['z'])
                     OrderManager.cash += float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_sell_count += 1
@@ -190,6 +181,10 @@ class OrderManager:
             order = RealOrder(**info)
             session.add(order)
         session.commit()
+
+        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+        telegram_thread.start()
+
         if to_balance:
             OrderManager.balance_strategy(order)
         session.close()
