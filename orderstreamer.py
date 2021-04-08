@@ -45,6 +45,8 @@ class OrderManager:
     last_trade_price = 0
     repeated_buy_count = 0
     repeated_sell_count = 0
+    cash = localsettings.initialcash
+    btc = localsettings.initialbtc
 
 
     @staticmethod
@@ -124,7 +126,7 @@ class OrderManager:
 
         message_text = msg['x']
         if msg['x'] == "TRADE":
-            message_text = f"{side}, {traded_volume}BTC in {price}$"
+            message_text = f"{side}, {traded_volume}BTC in {price}$"+f" wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
         elif msg['x'] == "NEW":
             message_text = f"NEW, {traded_volume}BTC in {price}$"
         elif msg['x'] == "CANCELED":
@@ -163,17 +165,20 @@ class OrderManager:
                 OrderManager.last_trade_price = order.price
                 to_balance = True
 
-                telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-                telegram_thread.start()
-
-                ######### stopping the code from overbuying or overselling when price is shooting high or plunging down ###
                 side = msg['S']
                 if side=='BUY':
+                    OrderManager.btc += localsettings.strategy_volume
+                    OrderManager.cash -= float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_buy_count += 1
                     OrderManager.repeated_sell_count = 0
                 elif side=='SELL':
+                    OrderManager.btc -= localsettings.strategy_volume
+                    OrderManager.cash += float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
+
+                telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+                telegram_thread.start()
 
                 print("order {} at {} is done".format(info['binance_id'], order.price))
 
@@ -231,7 +236,7 @@ class OrderManager:
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': order.price * (1-buy_step*localsettings.strategy_percent),
-            'quantity': 0.01*(1+0.001),
+            'quantity': localsettings.strategy_volume*(1+0.001),
             'symbol': "BTCUSDT",
         })
         #plunging price
@@ -242,7 +247,7 @@ class OrderManager:
             'type': 'LIMIT',
             'timeInForce': 'GTC',  # Good Till Cancel
             'price': order.price * (1+sell_step*localsettings.strategy_percent),
-            'quantity': 0.01,
+            'quantity': localsettings.strategy_volume,
             'symbol': "BTCUSDT",
         })
         #else:
