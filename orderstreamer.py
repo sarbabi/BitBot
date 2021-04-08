@@ -128,7 +128,7 @@ class OrderManager:
 
         message_text = f"{msg['x']}, {side}, {traded_volume}BTC in {price}$"
         if float(msg['z']) >= localsettings.strategy_volume:
-            message_text += f"\n wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
+            message_text += f"\n wallet update: btc({round(OrderManager.btc, 2)}), cash({round(OrderManager.cash, 2)})"
 
         telegram_send.send(messages=[message_text])
 
