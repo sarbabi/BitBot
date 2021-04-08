@@ -136,6 +136,9 @@ class OrderManager:
         print(msg)
         print(OrderManager.get_now())
 
+        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+        telegram_thread.start()
+
         OrderManager.insert_trade(msg)
         info = {
             'binance_id': str(msg['i']),
@@ -171,8 +174,8 @@ class OrderManager:
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
 
-                #telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-                #telegram_thread.start()
+                telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+                telegram_thread.start()
 
                 print("order {} at {} is done".format(info['binance_id'], order.price))
 
@@ -181,9 +184,6 @@ class OrderManager:
             order = RealOrder(**info)
             session.add(order)
         session.commit()
-
-        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-        telegram_thread.start()
 
         if to_balance:
             OrderManager.balance_strategy(order)
