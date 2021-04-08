@@ -149,6 +149,9 @@ class OrderManager:
             'status': msg['x'],
             'insert_time': OrderManager.get_now()
         }
+        print(info)
+        print(msg['x'])
+        print(msg['S'])
         session = Session()
         orders = session.query(RealOrder).filter(RealOrder.binance_id == info['binance_id'])
         to_balance = False
