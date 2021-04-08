@@ -46,6 +46,7 @@ class OrderManager:
     last_trade_price = 0
     repeated_buy_count = 0
     repeated_sell_count = 0
+    buy_sell = 0
     cash = localsettings.initialcash
     btc = localsettings.initialbtc
 
@@ -161,13 +162,15 @@ class OrderManager:
 
                 side = msg['S']
                 if side == 'BUY':
+                    OrderManager.buy_sell += 1
                     OrderManager.btc += float(msg['z'])
                     OrderManager.cash -= float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_buy_count += 1
                     OrderManager.repeated_sell_count = 0
                 elif side == 'SELL':
+                    OrderManager.buy_sell -= 1
                     OrderManager.btc -= float(msg['z'])
-                    OrderManager.cash += float(msg['p'])*float(msg['z'])
+                    OrderManager.cash += float(msg['p'])*float(msg['z']) * 0.999
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
 
@@ -220,11 +223,16 @@ class OrderManager:
         session.close()
 
         buy_step = 1
-        if OrderManager.repeated_buy_count >= 2:
-            buy_step = 2**(int(math.log2(OrderManager.repeated_buy_count))-1)
+        # if OrderManager.repeated_buy_count >= 2:
+        #     buy_step = 2**(int(math.log2(OrderManager.repeated_buy_count))-1)
+        if OrderManager.buy_sell >= 2:
+            buy_step = 2**(int(math.log2(OrderManager.buy_sell))-1)
+
         sell_step = 1
-        if OrderManager.repeated_sell_count >= 2:
-            sell_step = 2**(int(math.log2(OrderManager.repeated_sell_count))-1)
+        # if OrderManager.repeated_sell_count >= 2:
+        #     sell_step = 2**(int(math.log2(OrderManager.repeated_sell_count))-1)
+        if OrderManager.buy_sell <= -2:
+            sell_step = 2**(int(math.log2(-1 * OrderManager.buy_sell))-1)
 
         OrderManager.send_order({
             'side': 'BUY',
