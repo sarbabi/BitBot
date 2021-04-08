@@ -10,6 +10,7 @@ from dbtools.db import Session
 from sqlalchemy import or_, and_
 import telegram_send
 import threading
+import math
 
 """
 payload = {
@@ -167,13 +168,13 @@ class OrderManager:
 
                 side = msg['S']
                 if side=='BUY':
-                    OrderManager.btc += localsettings.strategy_volume
-                    OrderManager.cash -= float(msg['p'])*float(msg['z'])
+                    OrderManager.btc += float(msg['q'])
+                    OrderManager.cash -= float(msg['p'])*float(msg['q'])
                     OrderManager.repeated_buy_count += 1
                     OrderManager.repeated_sell_count = 0
                 elif side=='SELL':
-                    OrderManager.btc -= localsettings.strategy_volume
-                    OrderManager.cash += float(msg['p'])*float(msg['z'])
+                    OrderManager.btc -= float(msg['q'])
+                    OrderManager.cash += float(msg['p'])*float(msg['q'])
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
 
@@ -225,11 +226,11 @@ class OrderManager:
         session.close()
 
         buy_step = 1
-        if OrderManager.repeated_buy_count >= 3:
-            buy_step = 2
+        if OrderManager.repeated_buy_count >= 2:
+            buy_step = 2**(int(math.log2(OrderManager.repeated_buy_count))-1)
         sell_step = 1
-        if OrderManager.repeated_sell_count >= 3:
-            sell_step = 2
+        if OrderManager.repeated_sell_count >= 2:
+            sell_step = 2**(int(math.log2(OrderManager.repeated_sell_count))-1)
 
         OrderManager.send_order({
             'side': 'BUY',
