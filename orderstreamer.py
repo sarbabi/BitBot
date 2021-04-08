@@ -126,7 +126,7 @@ class OrderManager:
         side = msg['S']
 
         message_text = f"{msg['x']}, {side}, {traded_volume}BTC in {price}$"
-        if msg['z'] >= localsettings.strategy_volume:
+        if float(msg['z']) >= localsettings.strategy_volume:
             message_text += f"\n wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
 
         telegram_send.send(messages=[message_text])
@@ -135,9 +135,6 @@ class OrderManager:
     def update_order(msg):
         print(msg)
         print(OrderManager.get_now())
-
-        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-        telegram_thread.start()
 
         OrderManager.insert_trade(msg)
         info = {
@@ -149,9 +146,6 @@ class OrderManager:
             'status': msg['x'],
             'insert_time': OrderManager.get_now()
         }
-        print(info)
-        print(msg['x'])
-        print(msg['S'])
         session = Session()
         orders = session.query(RealOrder).filter(RealOrder.binance_id == info['binance_id'])
         to_balance = False
@@ -177,9 +171,6 @@ class OrderManager:
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
 
-                telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
-                telegram_thread.start()
-
                 print("order {} at {} is done".format(info['binance_id'], order.price))
 
             order.update_time = OrderManager.get_now()
@@ -187,6 +178,9 @@ class OrderManager:
             order = RealOrder(**info)
             session.add(order)
         session.commit()
+
+        telegram_thread = threading.Thread(target=OrderManager.send_telegram_message, args=[msg])
+        telegram_thread.start()
 
         if to_balance:
             OrderManager.balance_strategy(order)
