@@ -127,7 +127,9 @@ class OrderManager:
 
         message_text = msg['x']
         if msg['x'] == "TRADE":
-            message_text = f"{side}, {traded_volume}BTC in {price}$"+f" wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
+            message_text = f"{side}, {traded_volume}BTC in {price}$"
+            if(msg['z']>=localsettings.strategy_volume):
+                message_text += f" wallet update: btc({OrderManager.btc}), cash({OrderManager.cash})"
         elif msg['x'] == "NEW":
             message_text = f"NEW, {traded_volume}BTC in {price}$"
         elif msg['x'] == "CANCELED":
@@ -168,13 +170,13 @@ class OrderManager:
 
                 side = msg['S']
                 if side=='BUY':
-                    OrderManager.btc += float(msg['q'])
-                    OrderManager.cash -= float(msg['p'])*float(msg['q'])
+                    OrderManager.btc += float(msg['z'])
+                    OrderManager.cash -= float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_buy_count += 1
                     OrderManager.repeated_sell_count = 0
                 elif side=='SELL':
-                    OrderManager.btc -= float(msg['q'])
-                    OrderManager.cash += float(msg['p'])*float(msg['q'])
+                    OrderManager.btc -= float(msg['z'])
+                    OrderManager.cash += float(msg['p'])*float(msg['z'])
                     OrderManager.repeated_sell_count += 1
                     OrderManager.repeated_buy_count = 0
 
