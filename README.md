@@ -1,4 +1,5 @@
 This is a trader Bot for Bitcoin.
+(disclaimer: Although it's completely functional, keep in mind that I've made this as a fun and also basis for data analysis project.)
 
 It uses your Binance wallet API key to trade on your behalf.
 You can easily run it trade for you, only you need some parameters justification based on your risk level, and expectations.
